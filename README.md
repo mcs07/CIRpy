@@ -146,7 +146,7 @@ mol then has the following properties:
 
 The first time you access each one of these properties, a request is made to the CIR servers. The result is cached, however, so subsequent access is much faster.
 
-# Downloading files
+## Downloading files
 
 To resolve an identifier to a structure in a specific file format, use the `download` function:
 
