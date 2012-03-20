@@ -7,8 +7,12 @@ https://github.com/mcs07/CIRpy
 """
 
 
+import os
 import urllib2
 from xml.etree import ElementTree as ET
+
+
+API_BASE = 'http://cactus.nci.nih.gov/chemical/structure'
 
 
 def resolve(input, representation, resolvers=None):
@@ -22,7 +26,7 @@ def resolve(input, representation, resolvers=None):
 
 def query(input, representation, resolvers=None):
     """ Get all results for resolving input to the specified output representation """
-    apiurl = 'http://cactus.nci.nih.gov/chemical/structure/%s/%s/xml' % (urllib2.quote(input), representation)
+    apiurl = API_BASE+'/%s/%s/xml' % (urllib2.quote(input), representation)
     if resolvers is not None:
         r = ",".join(resolvers)
         apiurl += '?resolver=%s' % r
@@ -38,6 +42,16 @@ def query(input, representation, resolvers=None):
             datadict['value'] = datadict['value'][0]
         result.append(datadict)
     return result if result else None
+
+def download(input, filename, format='sdf', overwrite=False):
+    """ Resolve and download structure as a file """
+    url = API_BASE+'/%s/file?format=%s' % (urllib2.quote(input), format)
+    servefile = urllib2.urlopen(url)
+    if not overwrite and os.path.isfile(filename):
+        raise IOError("%s already exists. Use 'overwrite=True' to overwrite it." % filename)
+    file = open(filename, "w")
+    file.write(servefile.read())
+    file.close()
 
 
 class CacheProperty(object):
@@ -133,20 +147,21 @@ class Molecule(object):
 
     @property
     def image_url(self):
-        url = 'http://cactus.nci.nih.gov/chemical/structure/%s/image' % self.input
+        url = API_BASE+'/%s/image' % self.input
         if self.resolvers is not None:
             r = ",".join(self.resolvers)
-        url += '?resolver=%s' % r
+            url += '?resolver=%s' % r
         return url
 
     @property
     def twirl_url(self):
-        url = 'http://cactus.nci.nih.gov/chemical/structure/%s/twirl' % self.input
+        url = API_BASE+'/%s/twirl' % self.input
         if self.resolvers is not None:
             r = ",".join(self.resolvers)
-        url += '?resolver=%s' % r
+            url += '?resolver=%s' % r
         return url
 
-if __name__ == '__main__':
-    r = query('Morphine','smiles', ['name_pattern'])
-    print r
+    def download(self, filename, format='sdf', overwrite=False):
+        """ Download the resolved structure as a file """
+        download(self.input, filename, format, overwrite)
+

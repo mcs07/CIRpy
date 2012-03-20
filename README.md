@@ -4,7 +4,7 @@
 
 CIRpy is a Python interface for the [Chemical Identifier Resolver (CIR)](http://cactus.nci.nih.gov/chemical/structure) by the CADD Group at the NCI/NIH.
 
-CIR is a web service that performs various chemical name to structure conversions. In short, it will (attempt to) resolve the structure of any chemical identifier that you throw at it. Under the hood it uses a combination of OPSIN, ChemSpider and CIR's own database.
+CIR is a web service that performs various chemical name to structure conversions. In short, it will (attempt to) resolve the structure of any chemical identifier that you throw at it. Under the hood it uses a combination of [OPSIN](http://opsin.ch.cam.ac.uk/), [ChemSpider](http://www.chemspider.com/) and CIR's own database.
 
 CIRpy makes interacting with CIR through Python easy. There's no need to construct url requests and parse XML responses - CIRPy does all this for you.
 
@@ -62,11 +62,12 @@ CIR interprets input strings using "resolvers". `opsin_name`, `cir_name` and `ch
 The available resolvers are not well documented, but the ones that I can identify, roughly in the order that they are tried by default, are:
 
     smiles
-    stdinchi
     stdinchikey
+    stdinchi
     ncicadd_identifier		# (for FICTS, FICuS, uuuuu)
     hashisy
     cas_number
+    chemspider_id			# input must be chemspider_id=1234567
     opsin_name
     cir_name
     chemspider_name
@@ -103,13 +104,11 @@ The `notation` field of each item in the results will show you the name of the m
 
 [More info on the CIR blog](http://cactus.nci.nih.gov/blog/?p=1456).
 
-# File formats
+## Tautomers
 
-TODO: sdf, cif, cml etc. need a file save function
+To get Tautomers, use `tautomers:` before your input:
 
-## tautomers
-
-TODO: Queries like tautomers:aspirin
+    tautomers = query('tautomers:warfarin','smiles')
 
 ## The Molecule object
 
@@ -146,6 +145,42 @@ mol then has the following properties:
     mol.ringsys_count
 
 The first time you access each one of these properties, a request is made to the CIR servers. The result is cached, however, so subsequent access is much faster.
+
+# Downloading files
+
+To resolve an identifier to a structure in a specific file format, use the `download` function:
+
+	cirpy.download('Aspirin', 'test.sdf', 'sdf')
+	cirpy.download('Aspirin', 'test.sdf', 'sdf', True)
+	
+The first parameter is the input, the second is the file name, and the third is the file format. There is an optional fourth parameter to specify whether any existing file should be overwritten. The available formats are:
+
+alc
+cdxml
+cerius
+charmm
+cif
+cml
+ctx
+gjf
+gromacs
+hyperchem
+jme
+maestro
+mol
+mol2
+mrv
+pdb
+sdf
+sdf3000
+sln
+smiles
+xyz
+
+Alternatively, if you have a `Molecule` object you can use the `download` method in a similar way:
+
+    mol = Molecule('warfarin')
+    mol.download('test.cml', 'cml', True)
 
 ## Acknowledgements
 
