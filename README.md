@@ -114,6 +114,8 @@ To get Tautomers, use `tautomers:` before your input:
 
 The Molecule class provides an easy way to collect and store various structure representations and properties for a given input.
 
+    from cirpy import Molecule
+
     mol = Molecule('N[C@@H](C)C(=O)O', ['smiles'])
 
 

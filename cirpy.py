@@ -6,6 +6,8 @@ Python interface for the Chemical Identifier Resolver (CIR) by the CADD Group at
 https://github.com/mcs07/CIRpy
 """
 
+# TODO: Implement kwargs to allow arbitrary query strings to be appended to url
+# e.g. get3d=true for sdf/mol
 
 import os
 import urllib2
@@ -31,27 +33,35 @@ def query(input, representation, resolvers=None):
         r = ",".join(resolvers)
         apiurl += '?resolver=%s' % r
     result = []
-    tree = ET.parse(urllib2.urlopen(apiurl))
-    for data in tree.findall(".//data"):
-        datadict = {'resolver':data.attrib['resolver'],
-                    'notation':data.attrib['notation'],
-                    'value':[]}
-        for item in data.findall("item"):
-            datadict['value'].append(item.text)
-        if len(datadict['value']) == 1:
-            datadict['value'] = datadict['value'][0]
-        result.append(datadict)
+    try:
+        tree = ET.parse(urllib2.urlopen(apiurl))
+        for data in tree.findall(".//data"):
+            datadict = {'resolver':data.attrib['resolver'],
+                        'notation':data.attrib['notation'],
+                        'value':[]}
+            for item in data.findall("item"):
+                datadict['value'].append(item.text)
+            if len(datadict['value']) == 1:
+                datadict['value'] = datadict['value'][0]
+            result.append(datadict)
+    except urllib2.HTTPError:
+        # TODO: Proper handling of 404, for now just returns None
+        pass
     return result if result else None
 
 def download(input, filename, format='sdf', overwrite=False):
     """ Resolve and download structure as a file """
     url = API_BASE+'/%s/file?format=%s' % (urllib2.quote(input), format)
-    servefile = urllib2.urlopen(url)
-    if not overwrite and os.path.isfile(filename):
-        raise IOError("%s already exists. Use 'overwrite=True' to overwrite it." % filename)
-    file = open(filename, "w")
-    file.write(servefile.read())
-    file.close()
+    try:
+        servefile = urllib2.urlopen(url)
+        if not overwrite and os.path.isfile(filename):
+            raise IOError("%s already exists. Use 'overwrite=True' to overwrite it." % filename)
+        file = open(filename, "w")
+        file.write(servefile.read())
+        file.close()
+    except urllib2.HTTPError:
+        # TODO: Proper handling of 404, for now just does nothing
+        pass
 
 
 class CacheProperty(object):
