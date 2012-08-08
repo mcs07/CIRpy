@@ -20,6 +20,7 @@ The first parameter is the input string and the second parameter is the desired 
 
     stdinchi
     stdinchikey
+    inchi
     smiles
     ficts
     ficus
