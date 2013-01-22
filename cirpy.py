@@ -162,7 +162,7 @@ class Molecule(object):
 
     @property
     def image_url(self):
-        url = API_BASE+'/%s/image' % self.input
+        url = API_BASE+'/%s/image' % urllib2.quote(self.input)
         qsdict = self.kwargs
         if self.resolvers:
             qsdict['resolver'] = ",".join(self.resolvers)
@@ -172,7 +172,7 @@ class Molecule(object):
 
     @property
     def twirl_url(self):
-        url = API_BASE+'/%s/twirl' % self.input
+        url = API_BASE+'/%s/twirl' % urllib2.quote(self.input)
         qsdict = self.kwargs
         if self.resolvers:
             qsdict['resolver'] = ",".join(self.resolvers)

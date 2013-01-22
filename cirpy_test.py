@@ -19,6 +19,8 @@ class TestCIRpy(unittest.TestCase):
         self.morphine_inchi = [{'value': 'InChI=1/C17H19NO3/c1-18-7-6-17-10-3-5-13(20)16(17)21-15-12(19)4-2-9(14(15)17)8-11(10)18/h2-5,10-11,13,16,19-20H,6-8H2,1H3/t10-,11+,13?,16-,17-/m0/s1', 'notation': 'Morphine', 'resolver': 'cir_name'}]
         self.tnt_opsin_smiles = '[N+](=O)([O-])C1=C(C(=CC(=C1)[N+](=O)[O-])[N+](=O)[O-])C'
         self.tnt_cir_smiles = 'C1=C(C=C(C(=C1[N+]([O-])=O)C)[N+]([O-])=O)[N+]([O-])=O'
+        self.hash_smiles = 'C#N'
+        self.hs_image_url = 'http://cactus.nci.nih.gov/chemical/structure/C%23N/image?resolver=smiles'
         self.tnt_query = [{
             'value': '[N+](=O)([O-])C1=C(C(=CC(=C1)[N+](=O)[O-])[N+](=O)[O-])C',
             'notation': '2,4,6-trinitrotoluene',
@@ -43,7 +45,9 @@ class TestCIRpy(unittest.TestCase):
         self.assertEqual(query('Morphine', 'ogiuewrgpw'), None)
         self.assertEqual(query('2,4,6-trinitrotoluene', 'smiles'), self.tnt_query)
 
+    def test_molecule(self):
+        self.assertEqual(Molecule(self.hash_smiles, ['smiles']).image_url, self.hs_image_url)
+
 
 if __name__ == '__main__':
     unittest.main()
-
