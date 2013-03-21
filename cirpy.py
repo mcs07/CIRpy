@@ -13,6 +13,12 @@ import urllib2
 from xml.etree import ElementTree as ET
 
 
+__author__ = 'Matt Swain'
+__email__ = 'm.swain@me.com'
+__version__ = '1.0'
+__license__ = 'MIT'
+
+
 API_BASE = 'http://cactus.nci.nih.gov/chemical/structure'
 
 
