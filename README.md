@@ -51,14 +51,14 @@ There are also a number of structure based properties that can be specified usin
 
 By default, CIR resolves names first by using OPSIN, and if that fails, using a lookup in its own name index ([More info on the CIR blog](http://cactus.nci.nih.gov/blog/?p=1386)). A ChemSpider lookup is also available, but not used by default. With CIRpy you can tell CIR to use any combination of these three services, and also specify the order of precedence.
 
-Just use the `resolve` function with a third parameter - a list containing any of the strings `opsin_name`, `cir_name` and `chemspider_name`, in the order in which they should be tried.
+Just use the `resolve` function with a third parameter - a list containing any of the strings `name_by_opsin`, `name_by_cir` and `name_by_chemspider`, in the order in which they should be tried.
 
-    i = cirpy.resolve('Aspirin', 'inchi', ['opsin_name','cir_name','chemspider_name'] )
-    i = cirpy.resolve('Aspirin', 'inchi', ['chemspider_name','cir_name'] )
+    i = cirpy.resolve('Aspirin', 'inchi', ['name_by_opsin','name_by_cir','name_by_chemspider'] )
+    i = cirpy.resolve('Aspirin', 'inchi', ['name_by_chemspider','name_by_cir'] )
 
 ## Other resolvers
 
-CIR interprets input strings using "resolvers". `opsin_name`, `cir_name` and `chemspider_name` are just three examples. When no resolvers are specified, each one is tried in turn until one is successful.
+CIR interprets input strings using "resolvers". `name_by_opsin`, `name_by_cir` and `name_by_chemspider` are just three examples. When no resolvers are specified, each one is tried in turn until one is successful.
 
 The available resolvers are not well documented, but the ones that I can identify, roughly in the order that they are tried by default, are:
 
@@ -69,31 +69,31 @@ The available resolvers are not well documented, but the ones that I can identif
     hashisy
     cas_number
     chemspider_id			# input must be chemspider_id=1234567
-    opsin_name
-    cir_name
-    chemspider_name
+    name_by_opsin
+    name_by_cir
+    name_by_chemspider
 
-**Note:** `chemspider_name` is not used unless explicitly specified.
+**Note:** `name_by_chemspider` is not used unless explicitly specified.
 
 You can customise which resolvers are used (and their order) in exactly the same way as shown for the name resolvers above:
 
-    sdf = cirpy.resolve('Aspirin','sdf', ['smiles','inchi','opsin_name','cir_name'] )
+    sdf = cirpy.resolve('Aspirin','sdf', ['smiles','inchi','name_by_opsin','name_by_cir'] )
     name_list = cirpy.resolve('C1=CC=CC(=C1C(O)=O)OC(C)=O','names', ['smiles'] )
 
 ## Multiple results
 
-The `resolve` function will only return the top match for a given input. However, sometimes multiple resolvers will match an input (e.g. the name resolvers), and individual resolvers can even return multiple results (e.g. chemspider_name). The `query` function will return every result.
+The `resolve` function will only return the top match for a given input. However, sometimes multiple resolvers will match an input (e.g. the name resolvers), and individual resolvers can even return multiple results (e.g. name_by_chemspider). The `query` function will return every result.
 
     result = cirpy.query('Aspirin', 'inchi')
 
 As with the `resolve` function, it is possible to specify which resolvers are used:    
     
-    result = cirpy.query('Aspirin', 'smiles', ['opsin_name','cir_name'])
+    result = cirpy.query('Aspirin', 'smiles', ['name_by_opsin','name_by_cir'])
 
 Example result:
     
-    [ {'resolver':'opsin_name', 'value':'N[C@@H](C)C(=O)O', notation:'Aspirin'},
-      {'resolver':'cir_name', 'value':'[C@@H](C(O)=O)(C)N', notation:'Aspirin'} ]
+    [ {'resolver':'name_by_opsin', 'value':'N[C@@H](C)C(=O)O', notation:'Aspirin'},
+      {'resolver':'name_by_cir', 'value':'[C@@H](C(O)=O)(C)N', notation:'Aspirin'} ]
 
 ## Pattern matching
 
@@ -187,4 +187,4 @@ Alternatively, if you have a `Molecule` object you can use the `download` method
 
 ## Acknowledgements
 
-All of CIRpy's functionality relies on the fantastic [CIR web service](cactus.nci.nih.gov/chemical/structure) created by the CADD Group at the NCI/NIH.
+All of CIRpy's functionality relies on the fantastic [CIR web service](http://cactus.nci.nih.gov/chemical/structure) created by the CADD Group at the NCI/NIH.
