@@ -8,8 +8,7 @@ https://github.com/mcs07/CIRpy
 
 
 import os
-import urllib
-import urllib2
+from six.moves import urllib
 from xml.etree import ElementTree as ET
 
 
@@ -33,14 +32,14 @@ def resolve(input, representation, resolvers=None, **kwargs):
 
 def query(input, representation, resolvers=None, **kwargs):
     """ Get all results for resolving input to the specified output representation """
-    apiurl = API_BASE+'/%s/%s/xml' % (urllib2.quote(input), representation)
+    apiurl = API_BASE+'/%s/%s/xml' % (urllib.parse.quote(input), representation)
     if resolvers:
         kwargs['resolver'] = ",".join(resolvers)
     if kwargs:
-        apiurl+= '?%s' % urllib.urlencode(kwargs)
+        apiurl+= '?%s' % urllib.parse.urlencode(kwargs)
     result = []
     try:
-        tree = ET.parse(urllib2.urlopen(apiurl))
+        tree = ET.parse(urllib.request.urlopen(apiurl))
         for data in tree.findall(".//data"):
             datadict = {'resolver':data.attrib['resolver'],
                         'notation':data.attrib['notation'],
@@ -50,7 +49,7 @@ def query(input, representation, resolvers=None, **kwargs):
             if len(datadict['value']) == 1:
                 datadict['value'] = datadict['value'][0]
             result.append(datadict)
-    except urllib2.HTTPError:
+    except urllib.error.HTTPError:
         # TODO: Proper handling of 404, for now just returns None
         pass
     return result if result else None
@@ -60,16 +59,16 @@ def download(input, filename, format='sdf', overwrite=False, resolvers=None, **k
     kwargs['format'] = format
     if resolvers:
         kwargs['resolver'] = ",".join(resolvers)
-    url = API_BASE+'/%s/file?%s' % (urllib2.quote(input), urllib.urlencode(kwargs))
-    print url
+    url = API_BASE+'/%s/file?%s' % (urllib.parse.quote(input), urllib.parse.urlencode(kwargs))
+    print(url)
     try:
-        servefile = urllib2.urlopen(url)
+        servefile = urllib.request.urlopen(url)
         if not overwrite and os.path.isfile(filename):
             raise IOError("%s already exists. Use 'overwrite=True' to overwrite it." % filename)
         file = open(filename, "w")
         file.write(servefile.read())
         file.close()
-    except urllib2.HTTPError:
+    except urllib.error.HTTPError:
         # TODO: Proper handling of 404, for now just does nothing
         pass
 
@@ -168,22 +167,22 @@ class Molecule(object):
 
     @property
     def image_url(self):
-        url = API_BASE+'/%s/image' % urllib2.quote(self.input)
+        url = API_BASE+'/%s/image' % urllib.parse.quote(self.input)
         qsdict = self.kwargs
         if self.resolvers:
             qsdict['resolver'] = ",".join(self.resolvers)
         if qsdict:
-            url += '?%s' % urllib.urlencode(qsdict)
+            url += '?%s' % urllib.parse.urlencode(qsdict)
         return url
 
     @property
     def twirl_url(self):
-        url = API_BASE+'/%s/twirl' % urllib2.quote(self.input)
+        url = API_BASE+'/%s/twirl' % urllib.parse.quote(self.input)
         qsdict = self.kwargs
         if self.resolvers:
             qsdict['resolver'] = ",".join(self.resolvers)
         if qsdict:
-            url += '?%s' % urllib.urlencode(qsdict)
+            url += '?%s' % urllib.parse.urlencode(qsdict)
         return url
 
     def download(self, filename, format='sdf', overwrite=False, resolvers=None, **kwargs):
