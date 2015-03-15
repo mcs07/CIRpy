@@ -10,7 +10,8 @@ https://github.com/mcs07/CIRpy
 import unittest
 
 from cirpy import *
-from urllib2 import HTTPError
+from six.moves import urllib
+HTTPError = urllib.error.HTTPError
 
 class TestCIRpy(unittest.TestCase):
 

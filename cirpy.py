@@ -60,7 +60,7 @@ def download(input, filename, format='sdf', overwrite=False, resolvers=None, **k
     if resolvers:
         kwargs['resolver'] = ",".join(resolvers)
     url = API_BASE+'/%s/file?%s' % (urllib.parse.quote(input), urllib.parse.urlencode(kwargs))
-    print url
+    print(url)
     try:
         servefile = urllib.request.urlopen(url)
         if not overwrite and os.path.isfile(filename):
