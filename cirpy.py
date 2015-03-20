@@ -73,7 +73,6 @@ def download(input, filename, format='sdf', overwrite=False, resolvers=None, **k
     if resolvers:
         kwargs['resolver'] = ','.join(resolvers)
     url = '%s/%s/file?%s' % (API_BASE, quote(input), urlencode(kwargs))
-    print url
     try:
         servefile = urlopen(url)
         if not overwrite and os.path.isfile(filename):
