@@ -6,8 +6,8 @@ Python interface for the Chemical Identifier Resolver (CIR) by the CADD Group at
 https://github.com/mcs07/CIRpy
 """
 
-
 import os
+import functools
 
 try:
     from urllib.error import HTTPError
@@ -85,19 +85,16 @@ def download(input, filename, format='sdf', overwrite=False, resolvers=None, **k
         pass
 
 
-class CacheProperty(object):
-    """Descriptor for caching Molecule properties."""
-
-    def __init__(self, func):
-        self._func = func
-        self.__name__ = func.__name__
-        self.__doc__ = func.__doc__
-
-    def __get__(self, obj, obj_class=None):
-        if obj is None:
-            return None
-        result = obj.__dict__[self.__name__] = self._func(obj)
-        return result
+def memoized_property(fget):
+    """Decorator to create memoized properties."""
+    attr_name = '_{0}'.format(fget.__name__)
+    
+    @functools.wraps(fget)
+    def fget_memoized(self):
+        if not hasattr(self, attr_name):
+            setattr(self, attr_name, fget(self))
+        return getattr(self, attr_name)
+    return property(fget_memoized)
 
 
 class Molecule(object):
@@ -112,91 +109,91 @@ class Molecule(object):
     def __repr__(self):
         return 'Molecule(%r, %r)' % (self.input, self.resolvers)
 
-    @CacheProperty
+    @memoized_property
     def stdinchi(self):
         return resolve(self.input, 'stdinchi', self.resolvers, **self.kwargs)
 
-    @CacheProperty
+    @memoized_property
     def stdinchikey(self):
         return resolve(self.input, 'stdinchikey', self.resolvers, **self.kwargs)
 
-    @CacheProperty
+    @memoized_property
     def smiles(self):
         return resolve(self.input, 'smiles', self.resolvers, **self.kwargs)
 
-    @CacheProperty
+    @memoized_property
     def ficts(self):
         return resolve(self.input, 'ficts', self.resolvers, **self.kwargs)
 
-    @CacheProperty
+    @memoized_property
     def ficus(self):
         return resolve(self.input, 'ficus', self.resolvers, **self.kwargs)
 
-    @CacheProperty
+    @memoized_property
     def uuuuu(self):
         return resolve(self.input, 'uuuuu', self.resolvers, **self.kwargs)
 
-    @CacheProperty
+    @memoized_property
     def hashisy(self):
         return resolve(self.input, 'hashisy', self.resolvers, **self.kwargs)
 
-    @CacheProperty
+    @memoized_property
     def sdf(self):
         return resolve(self.input, 'sdf', self.resolvers, **self.kwargs)
 
-    @CacheProperty
+    @memoized_property
     def names(self):
         return resolve(self.input, 'names', self.resolvers, **self.kwargs)
 
-    @CacheProperty
+    @memoized_property
     def iupac_name(self):
         return resolve(self.input, 'iupac_name', self.resolvers, **self.kwargs)
 
-    @CacheProperty
+    @memoized_property
     def cas(self):
         return resolve(self.input, 'cas', self.resolvers, **self.kwargs)
 
-    @CacheProperty
+    @memoized_property
     def chemspider_id(self):
         return resolve(self.input, 'chemspider_id', self.resolvers, **self.kwargs)
 
-    @CacheProperty
+    @memoized_property
     def mw(self):
         return resolve(self.input, 'mw', self.resolvers, **self.kwargs)
 
-    @CacheProperty
+    @memoized_property
     def formula(self):
         return resolve(self.input, 'formula', self.resolvers, **self.kwargs)
 
-    @CacheProperty
+    @memoized_property
     def h_bond_donor_count(self):
         return resolve(self.input, 'h_bond_donor_count', self.resolvers, **self.kwargs)
 
-    @CacheProperty
+    @memoized_property
     def h_bond_acceptor_count(self):
         return resolve(self.input, 'h_bond_acceptor_count', self.resolvers, **self.kwargs)
 
-    @CacheProperty
+    @memoized_property
     def h_bond_center_count(self):
         return resolve(self.input, 'h_bond_center_count', self.resolvers, **self.kwargs)
 
-    @CacheProperty
+    @memoized_property
     def rule_of_5_violation_count(self):
         return resolve(self.input, 'rule_of_5_violation_count', self.resolvers, **self.kwargs)
 
-    @CacheProperty
+    @memoized_property
     def rotor_count(self):
         return resolve(self.input, 'rotor_count', self.resolvers, **self.kwargs)
 
-    @CacheProperty
+    @memoized_property
     def effective_rotor_count(self):
         return resolve(self.input, 'effective_rotor_count', self.resolvers, **self.kwargs)
 
-    @CacheProperty
+    @memoized_property
     def ring_count(self):
         return resolve(self.input, 'ring_count', self.resolvers, **self.kwargs)
 
-    @CacheProperty
+    @memoized_property
     def ringsys_count(self):
         return resolve(self.input, 'ringsys_count', self.resolvers, **self.kwargs)
 
