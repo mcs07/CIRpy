@@ -77,9 +77,8 @@ def download(input, filename, format='sdf', overwrite=False, resolvers=None, **k
         servefile = urlopen(url)
         if not overwrite and os.path.isfile(filename):
             raise IOError("%s already exists. Use 'overwrite=True' to overwrite it." % filename)
-        file = open(filename, 'w')
-        file.write(servefile.read())
-        file.close()
+        with open(filename, 'w') as f:
+            f.write(servefile.read())
     except HTTPError:
         # TODO: Proper handling of 404, for now just does nothing
         pass
