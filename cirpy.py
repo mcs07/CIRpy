@@ -10,7 +10,14 @@ https://github.com/mcs07/CIRpy
 import os
 import urllib
 import urllib2
-from xml.etree import ElementTree as ET
+
+try:
+    from lxml import etree
+except ImportError:
+    try:
+        import xml.etree.cElementTree as etree
+    except ImportError:
+        import xml.etree.ElementTree as etree
 
 
 __author__ = 'Matt Swain'
@@ -40,7 +47,7 @@ def query(input, representation, resolvers=None, **kwargs):
         apiurl+= '?%s' % urllib.urlencode(kwargs)
     result = []
     try:
-        tree = ET.parse(urllib2.urlopen(apiurl))
+        tree = etree.parse(urllib2.urlopen(apiurl))
         for data in tree.findall(".//data"):
             datadict = {'resolver':data.attrib['resolver'],
                         'notation':data.attrib['notation'],
