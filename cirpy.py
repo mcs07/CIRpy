@@ -22,7 +22,7 @@ except ImportError:
 
 __author__ = 'Matt Swain'
 __email__ = 'm.swain@me.com'
-__version__ = '1.0'
+__version__ = '1.0.0'
 __license__ = 'MIT'
 
 
