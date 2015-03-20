@@ -1,0 +1,4 @@
+-r common.txt
+bumpversion==0.5.1
+coverage==3.7.1
+coveralls==0.5

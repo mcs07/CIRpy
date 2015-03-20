@@ -1,0 +1,16 @@
+language: python
+python:
+  - "2.7"
+  - "3.2"
+  - "3.3"
+  - "3.4"
+env:
+  - OPTIONAL_DEPS=true
+  - OPTIONAL_DEPS=false
+install:
+  - pip install coveralls
+  - if [ "$OPTIONAL_DEPS" = true ]; then pip install lxml; fi
+script:
+  - coverage run --source=cirpy setup.py test
+after_success:
+  - coveralls
