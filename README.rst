@@ -198,7 +198,7 @@ Acknowledgements
 
 All of CIRpy's functionality relies on the fantastic `CIR web service`_ created by the CADD Group at the NCI/NIH.
 
-.. _`Chemical Identifier Resolver (CIR)': http://cactus.nci.nih.gov/chemical/structure
+.. _`Chemical Identifier Resolver (CIR)`: http://cactus.nci.nih.gov/chemical/structure
 .. _`OPSIN`: http://opsin.ch.cam.ac.uk/
 .. _`ChemSpider`: http://www.chemspider.com/
 .. _`Read more about resolving names on the CIR blog`: http://cactus.nci.nih.gov/blog/?p=1386
