@@ -6,8 +6,12 @@ Python interface for the Chemical Identifier Resolver (CIR) by the CADD Group at
 https://github.com/mcs07/CIRpy
 """
 
-import os
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import division
 import functools
+import logging
+import os
 
 try:
     from urllib.error import HTTPError
@@ -31,57 +35,190 @@ __email__ = 'm.swain@me.com'
 __version__ = '1.0.0'
 __license__ = 'MIT'
 
+log = logging.getLogger('cirpy')
+log.addHandler(logging.NullHandler())
 
 API_BASE = 'http://cactus.nci.nih.gov/chemical/structure'
+FILE_FORMATS = {
+    'alc', 'cdxml', 'cerius', 'charmm', 'cif', 'cml', 'ctx', 'gjf', 'gromacs', 'hyperchem', 'jme', 'maestro', 'mol',
+    'mol2', 'mrv', 'pdb', 'sdf3000', 'sln', 'xyz'
+}
 
 
-def resolve(input, representation, resolvers=None, **kwargs):
-    """Resolve input to the specified output representation."""
-    resultdict = query(input, representation, resolvers, **kwargs)
-    result = resultdict[0]['value'] if resultdict else None
-    if result and len(result) == 1:
-        result = result[0]
+def construct_api_url(input, representation, resolvers=None, get3d=False, tautomers=False, xml=True, **kwargs):
+    """Return the URL for the desired API endpoint.
+
+    :param str input: Chemical identifier to resolve
+    :param str representation: Desired output representation
+    :param list(str) resolvers: (Optional) Ordered list of resolvers to use
+    :param bool get3d: (Optional) Whether to return 3D coordinates (where applicable)
+    :param bool tautomers: (Optional) Whether to return all tautomers
+    :param bool xml: (Optional) Whether to return full XML response
+    :returns: CIR API URL
+    :rtype: str
+    """
+    # File formats require representation=file and the format in the querystring
+    if representation in FILE_FORMATS:
+        kwargs['format'] = representation
+        representation = 'file'
+    # Prepend input with 'tautomers:' to return all tautomers
+    if tautomers:
+        input = 'tautomers:%s' % input
+    url = '%s/%s/%s' % (API_BASE, quote(input), representation)
+    if xml:
+        url += '/xml'
+    if resolvers:
+        kwargs['resolver'] = ','.join(resolvers)
+    if get3d:
+        kwargs['get3d'] = True
+    if kwargs:
+        url += '?%s' % urlencode(kwargs)
+    return url
+
+
+def request(input, representation, resolvers=None, get3d=False, tautomers=False, **kwargs):
+    """Make a request to CIR and return the XML response.
+
+    :param str input: Chemical identifier to resolve
+    :param str representation: Desired output representation
+    :param list(str) resolvers: (Optional) Ordered list of resolvers to use
+    :param bool get3d: (Optional) Whether to return 3D coordinates (where applicable)
+    :param bool tautomers: (Optional) Whether to return all tautomers
+    :returns: XML response from CIR
+    :rtype: Element
+    :raises HTTPError: if CIR returns an error code
+    :raises ParseError: if CIR response is uninterpretable
+    """
+    url = construct_api_url(input, representation, resolvers, get3d, tautomers, **kwargs)
+    log.debug('Making request: %s', url)
+    response = urlopen(url)
+    return etree.parse(response).getroot()
+
+
+class Result(object):
+    """A single result returned by CIR."""
+
+    def __init__(self, input, notation, input_format, resolver, representation, value):
+        """
+
+        :param str input: Originally supplied input identifier that produced this result
+        :param str notation: Identifier matched by the resolver or tautomer ID
+        :param str input_format: Format of the input as interpreted by the resolver
+        :param str resolver: Resolver used to produce this result
+        :param str representation: Requested output representation
+        :param str or list(str) value: Actual result value
+        """
+        self.input = input
+        self.representation = representation
+        self.resolver = resolver
+        self.input_format = input_format
+        self.notation = notation
+        self.value = value
+
+    def __repr__(self):
+        return 'Result(input=%r, representation=%r, resolver=%r, input_format=%r, notation=%r, value=%r)' \
+               % (self.input, self.representation, self.resolver, self.input_format, self.notation, self.value)
+
+    def __str__(self):
+        return self.value
+
+    def __eq__(self, other):
+        return isinstance(other, type(self)) and self.__dict__ == other.__dict__
+
+    def __getitem__(self, prop):
+        """Allow dict-style access to attributes to ease transition from when results were dicts."""
+        if prop in self.__dict__:
+            return getattr(self, prop)
+        raise KeyError(prop)
+
+    def __setitem__(self, prop, val):
+        """Allow dict-style setting of attributes to ease transition from when results were dicts."""
+        setattr(self, prop, val)
+
+    def __contains__(self, prop):
+        """Allow dict-style checking of attributes to ease transition from when results were dicts."""
+        return prop in self.__dict__
+
+    def to_dict(self):
+        """Return a dictionary containing Result data."""
+        return self.__dict__
+
+
+def query(input, representation, resolvers=None, get3d=False, tautomers=False, **kwargs):
+    """Get all results for resolving input to the specified output representation.
+
+    :param str input: Chemical identifier to resolve
+    :param str representation: Desired output representation
+    :param list(str) resolvers: (Optional) Ordered list of resolvers to use
+    :param bool get3d: (Optional) Whether to return 3D coordinates (where applicable)
+    :param bool tautomers: (Optional) Whether to return all tautomers
+    :returns: List of resolved results
+    :rtype: list(Result)
+    :raises HTTPError: if CIR returns an error code
+    :raises ParseError: if CIR response is uninterpretable
+    """
+    tree = request(input, representation, resolvers, get3d, tautomers, **kwargs)
+    results = []
+    for data in tree.findall('.//data'):
+        value = [item.text for item in data.findall('item')]
+        result = Result(
+            input=tree.attrib['string'],
+            representation=tree.attrib['representation'],
+            resolver=data.attrib['resolver'],
+            input_format=data.attrib['string_class'],
+            notation=data.attrib['notation'],
+            value=value[0] if len(value) == 1 else value
+        )
+        results.append(result)
+    log.debug('Received %s query results', len(results))
+    return results
+
+
+def resolve(input, representation, resolvers=None, get3d=False, **kwargs):
+    """Resolve input to the specified output representation.
+
+    :param str input: Chemical identifier to resolve
+    :param str representation: Desired output representation
+    :param list(str) resolvers: (Optional) Ordered list of resolvers to use
+    :param bool get3d: (Optional) Whether to return 3D coordinates (where applicable)
+    :returns: Output representation or None
+    :rtype: str or None
+    :raises HTTPError: if CIR returns an error code
+    :raises ParseError: if CIR response is uninterpretable
+    """
+    # Take first result from XML query
+    results = query(input, representation, resolvers, False, get3d, **kwargs)
+    result = results[0].value if results else None
     return result
 
 
-def query(input, representation, resolvers=None, **kwargs):
-    """Get all results for resolving input to the specified output representation."""
-    apiurl = '%s/%s/%s/xml' % (API_BASE, quote(input), representation)
-    if resolvers:
-        kwargs['resolver'] = ','.join(resolvers)
-    if kwargs:
-        apiurl += '?%s' % urlencode(kwargs)
-    result = []
-    try:
-        tree = etree.parse(urlopen(apiurl))
-        for data in tree.findall('.//data'):
-            datadict = {'resolver': data.attrib['resolver'], 'notation': data.attrib['notation'], 'value': []}
-            for item in data.findall('item'):
-                datadict['value'].append(item.text)
-            if len(datadict['value']) == 1:
-                datadict['value'] = datadict['value'][0]
-            result.append(datadict)
-    except HTTPError:
-        # TODO: Proper handling of 404, for now just returns None
-        pass
-    return result if result else None
+def download(input, filename, representation, overwrite=False, resolvers=None, get3d=False, **kwargs):
+    """Convenience function to save a CIR response as a file.
 
+    This is just a simple wrapper around the resolve function.
 
-def download(input, filename, format='sdf', overwrite=False, resolvers=None, **kwargs):
-    """Resolve and download structure as a file."""
-    kwargs['format'] = format
-    if resolvers:
-        kwargs['resolver'] = ','.join(resolvers)
-    url = '%s/%s/file?%s' % (API_BASE, quote(input), urlencode(kwargs))
-    try:
-        servefile = urlopen(url)
-        if not overwrite and os.path.isfile(filename):
-            raise IOError("%s already exists. Use 'overwrite=True' to overwrite it." % filename)
-        with open(filename, 'w') as f:
-            f.write(servefile.read())
-    except HTTPError:
-        # TODO: Proper handling of 404, for now just does nothing
-        pass
+    :param str input: Chemical identifier to resolve
+    :param str representation: Desired output representation
+    :param bool overwrite: (Optional) Whether to allow overwriting of an existing file
+    :param list(str) resolvers: (Optional) Ordered list of resolvers to use
+    :param bool get3d: (Optional) Whether to return 3D coordinates (where applicable)
+    :raises HTTPError: if CIR returns an error code
+    :raises ParseError: if CIR response is uninterpretable
+    :raises IOError: if overwrite is False and file already exists
+    """
+    result = resolve(input, representation, resolvers, get3d, **kwargs)
+    # Just log and return if nothing resolved
+    if not result:
+        log.debug('No file to download.')
+        return
+    # Only overwrite an existing file if explicitly instructed to.
+    if not overwrite and os.path.isfile(filename):
+        raise IOError("%s already exists. Use 'overwrite=True' to overwrite it." % filename)
+    # Ensure file ends with a newline
+    if not result.endswith('\n'):
+        result += '\n'
+    with open(filename, 'w') as f:
+        f.write(result)
 
 
 def memoized_property(fget):
@@ -99,124 +236,142 @@ def memoized_property(fget):
 class Molecule(object):
     """Class to hold and cache the structure information for a given CIR input."""
 
-    def __init__(self, input, resolvers=None, **kwargs):
-        """Initialize with a query input."""
+    def __init__(self, input, resolvers=None, get3d=False, **kwargs):
+        """Initialize with a resolver input."""
         self.input = input
         self.resolvers = resolvers
+        self.get3d = get3d
         self.kwargs = kwargs
+        log.debug('Instantiated Molecule: %s' % self)
 
     def __repr__(self):
-        return 'Molecule(%r, %r)' % (self.input, self.resolvers)
+        return 'Molecule(input=%r, resolvers=%r, get3d=%r, kwargs=%r)' \
+               % (self.input, self.resolvers, self.get3d, self.kwargs)
 
     @memoized_property
     def stdinchi(self):
+        """Standard InChI."""
         return resolve(self.input, 'stdinchi', self.resolvers, **self.kwargs)
 
     @memoized_property
     def stdinchikey(self):
+        """Standard InChIKey."""
         return resolve(self.input, 'stdinchikey', self.resolvers, **self.kwargs)
 
     @memoized_property
     def smiles(self):
+        """SMILES string."""
         return resolve(self.input, 'smiles', self.resolvers, **self.kwargs)
 
     @memoized_property
     def ficts(self):
+        """FICTS NCI/CADD hashed structure identifier."""
         return resolve(self.input, 'ficts', self.resolvers, **self.kwargs)
 
     @memoized_property
     def ficus(self):
+        """FICuS NCI/CADD hashed structure identifier."""
         return resolve(self.input, 'ficus', self.resolvers, **self.kwargs)
 
     @memoized_property
     def uuuuu(self):
+        """uuuuu NCI/CADD hashed structure identifier."""
         return resolve(self.input, 'uuuuu', self.resolvers, **self.kwargs)
 
     @memoized_property
     def hashisy(self):
+        """CACTVS HASHISY identifier."""
         return resolve(self.input, 'hashisy', self.resolvers, **self.kwargs)
 
     @memoized_property
     def sdf(self):
+        """SDF file."""
         return resolve(self.input, 'sdf', self.resolvers, **self.kwargs)
 
     @memoized_property
     def names(self):
+        """List of chemical names."""
         return resolve(self.input, 'names', self.resolvers, **self.kwargs)
 
     @memoized_property
     def iupac_name(self):
+        """IUPAC approved name."""
         return resolve(self.input, 'iupac_name', self.resolvers, **self.kwargs)
 
     @memoized_property
     def cas(self):
+        """CAS registry numbers."""
         return resolve(self.input, 'cas', self.resolvers, **self.kwargs)
 
     @memoized_property
     def chemspider_id(self):
+        """ChemSpider ID."""
         return resolve(self.input, 'chemspider_id', self.resolvers, **self.kwargs)
 
     @memoized_property
     def mw(self):
+        """Molecular weight."""
         return resolve(self.input, 'mw', self.resolvers, **self.kwargs)
 
     @memoized_property
     def formula(self):
+        """Molecular formula"""
         return resolve(self.input, 'formula', self.resolvers, **self.kwargs)
 
     @memoized_property
     def h_bond_donor_count(self):
+        """Hydrogen bond donor count."""
         return resolve(self.input, 'h_bond_donor_count', self.resolvers, **self.kwargs)
 
     @memoized_property
     def h_bond_acceptor_count(self):
+        """Hydrogen bond acceptor count."""
         return resolve(self.input, 'h_bond_acceptor_count', self.resolvers, **self.kwargs)
 
     @memoized_property
     def h_bond_center_count(self):
+        """Hydrogen bond center count."""
         return resolve(self.input, 'h_bond_center_count', self.resolvers, **self.kwargs)
 
     @memoized_property
     def rule_of_5_violation_count(self):
+        """Rule of 5 violation count."""
         return resolve(self.input, 'rule_of_5_violation_count', self.resolvers, **self.kwargs)
 
     @memoized_property
     def rotor_count(self):
+        """Rotor count."""
         return resolve(self.input, 'rotor_count', self.resolvers, **self.kwargs)
 
     @memoized_property
     def effective_rotor_count(self):
+        """Effective rotor count."""
         return resolve(self.input, 'effective_rotor_count', self.resolvers, **self.kwargs)
 
     @memoized_property
     def ring_count(self):
+        """Ring count."""
         return resolve(self.input, 'ring_count', self.resolvers, **self.kwargs)
 
     @memoized_property
     def ringsys_count(self):
+        """Ring system count."""
         return resolve(self.input, 'ringsys_count', self.resolvers, **self.kwargs)
 
     @property
     def image_url(self):
-        url = '%s/%s/image' % (API_BASE, quote(self.input))
-        qsdict = self.kwargs
-        if self.resolvers:
-            qsdict['resolver'] = ','.join(self.resolvers)
-        if qsdict:
-            url += '?%s' % urlencode(qsdict)
-        return url
+        """URL of a GIF image."""
+        return construct_api_url(self.input, 'image', self.resolvers, False, self.get3d, False, **self.kwargs)
 
     @property
     def twirl_url(self):
-        url = '%s/%s/twirl' % (API_BASE, quote(self.input))
-        qsdict = self.kwargs
-        if self.resolvers:
-            qsdict['resolver'] = ','.join(self.resolvers)
-        if qsdict:
-            url += '?%s' % urlencode(qsdict)
-        return url
+        """Url of a TwirlyMol 3D viewer."""
+        return construct_api_url(self.input, 'twirl', self.resolvers, False, self.get3d, False, **self.kwargs)
 
-    def download(self, filename, format='sdf', overwrite=False, resolvers=None, **kwargs):
+    def download(self, filename, fmt='sdf', overwrite=False):
         """Download the resolved structure as a file."""
-        download(self.input, filename, format, overwrite, resolvers, **kwargs)
+        download(self.input, filename, fmt, overwrite, self.resolvers, self.get3d, **self.kwargs)
+
+
+
 

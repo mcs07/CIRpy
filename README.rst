@@ -41,9 +41,34 @@ options for the second parameter are::
     mw                      # Molecular weight
     formula
 
-All return a string, apart from ``names`` which returns a list of strings.
+All return a string, apart from ``names`` and ``cas``, which return a list of strings.
 
-There are also a number of structure based properties that can be specified using the second parameter in the same way::
+Additionally, output can be returned in a variety of file formats that can be specified using the second parameter in
+the same way::
+
+    alc
+    cdxml
+    cerius
+    charmm
+    cif
+    cml
+    ctx
+    gjf
+    gromacs
+    hyperchem
+    jme
+    maestro
+    mol
+    mol2
+    mrv
+    pdb
+    sdf
+    sdf3000
+    sln
+    smiles
+    xyz
+
+Finally, a number of structure based properties can be returned, also specified using the second parameter::
 
     h_bond_donor_count
     h_bond_acceptor_count
@@ -131,9 +156,9 @@ example).
 Tautomers
 ---------
 
-To get Tautomers, use ``tautomers:`` before your input::
+To get all possible resolved tautomers, use the ``tautomers`` parameter::
 
-    tautomers = query('tautomers:warfarin','smiles')
+    tautomers = query('warfarin', 'smiles', tautomers=True)
 
 The Molecule object
 -------------------
@@ -143,7 +168,7 @@ given input::
 
     from cirpy import Molecule
 
-    mol = Molecule('N[C@@H](C)C(=O)O', ['smiles'])
+    mol = Molecule('N[C@@H](C)C(=O)O')
 
 ``mol`` then has the following properties::
 
@@ -178,20 +203,13 @@ however, so subsequent access is much faster.
 Downloading files
 -----------------
 
-To resolve an identifier to a structure in a specific file format, use the ``download`` function::
+A convenience function is provided to facilitate downloading the CIR output to a file::
 
     cirpy.download('Aspirin', 'test.sdf', 'sdf')
-    cirpy.download('Aspirin', 'test.sdf', 'sdf', True)
+    cirpy.download('Aspirin', 'test.sdf', 'sdf', overwrite=True)
 
-The first parameter is the input, the second is the file name, and the third is the file format. There is an optional
-fourth parameter to specify whether any existing file should be overwritten. The available formats are:
-
-alc cdxml cerius charmm cif cml ctx gjf gromacs hyperchem jme maestro mol mol2 mrv pdb sdf sdf3000 sln smiles xyz
-
-Alternatively, if you have a ``Molecule`` object you can use the ``download`` method in a similar way::
-
-    mol = Molecule('warfarin')
-    mol.download('test.cml', 'cml', True)
+This works in the same way as the ``resolve`` function, but also accepts a filename. There is an optional ``overwrite``
+parameter to specify whether any existing file should be overwritten.
 
 Acknowledgements
 ----------------
