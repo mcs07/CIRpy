@@ -199,6 +199,7 @@ def download(input, filename, representation, overwrite=False, resolvers=None, g
     This is just a simple wrapper around the resolve function.
 
     :param str input: Chemical identifier to resolve
+    :param str filename: File path to save to
     :param str representation: Desired output representation
     :param bool overwrite: (Optional) Whether to allow overwriting of an existing file
     :param list(str) resolvers: (Optional) Ordered list of resolvers to use
@@ -374,9 +375,14 @@ class Molecule(object):
         """Url of a TwirlyMol 3D viewer."""
         return construct_api_url(self.input, 'twirl', self.resolvers, False, self.get3d, False, **self.kwargs)
 
-    def download(self, filename, fmt='sdf', overwrite=False):
-        """Download the resolved structure as a file."""
-        download(self.input, filename, fmt, overwrite, self.resolvers, self.get3d, **self.kwargs)
+    def download(self, filename, representation, overwrite=False):
+        """Download the resolved structure as a file.
+
+        :param str filename: File path to save to
+        :param str representation: Desired output representation
+        :param bool overwrite: (Optional) Whether to allow overwriting of an existing file
+        """
+        download(self.input, filename, representation, overwrite, self.resolvers, self.get3d, **self.kwargs)
 
 
 
