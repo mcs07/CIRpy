@@ -106,7 +106,8 @@ class Result(object):
         :param str input_format: Format of the input as interpreted by the resolver
         :param str resolver: Resolver used to produce this result
         :param str representation: Requested output representation
-        :param str or list(str) value: Actual result value
+        :param value: Actual result value
+        :type value: str or list(str)
         """
         self.input = input
         self.representation = representation
@@ -257,6 +258,11 @@ class Molecule(object):
     def stdinchikey(self):
         """Standard InChIKey."""
         return resolve(self.input, 'stdinchikey', self.resolvers, **self.kwargs)
+
+    @memoized_property
+    def inchi(self):
+        """Non-standard InChI. (Uses options DONOTADDH W0 FIXEDH RECMET NEWPS SPXYZ SAsXYZ Fb Fnud)."""
+        return resolve(self.input, 'inchi', self.resolvers, **self.kwargs)
 
     @memoized_property
     def smiles(self):
