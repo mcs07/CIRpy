@@ -10,6 +10,8 @@ from __future__ import print_function
 from __future__ import unicode_literals
 from __future__ import division
 import logging
+import os
+import time
 import unittest
 
 try:
@@ -31,7 +33,14 @@ from cirpy import request, resolve, query, Molecule, Result, resolve_image
 logging.basicConfig(level=logging.DEBUG)
 
 
-class TestRequest(unittest.TestCase):
+class RateLimitTestCase(unittest.TestCase):
+    """TestCase that delays before each test according to CIRPY_TEST_DELAY environment variable."""
+
+    def setUp(self):
+        time.sleep(float(os.environ.get('CIRPY_TEST_DELAY', 0)))
+
+
+class TestRequest(RateLimitTestCase):
     """Test basic requests to CIR servers return the expected XML response."""
 
     def test_requests(self):
@@ -52,7 +61,7 @@ class TestRequest(unittest.TestCase):
             request('Morphine', 'ogiuewrgpw')
 
 
-class TestQuery(unittest.TestCase):
+class TestQuery(RateLimitTestCase):
     """Test the query function returns expected results."""
 
     def test_morphine_inchi(self):
@@ -99,7 +108,7 @@ class TestQuery(unittest.TestCase):
         self.assertNotEqual(r1, r3)
 
 
-class TestResolve(unittest.TestCase):
+class TestResolve(RateLimitTestCase):
     """Test the resolve function."""
 
     def test_alanine_smiles(self):
@@ -134,7 +143,7 @@ class TestResolve(unittest.TestCase):
         )
 
 
-class TestMolecule(unittest.TestCase):
+class TestMolecule(RateLimitTestCase):
     """Test the Molecule class."""
 
     def test_molecule_image(self):
@@ -145,7 +154,7 @@ class TestMolecule(unittest.TestCase):
         )
 
 
-class TestFiles(unittest.TestCase):
+class TestFiles(RateLimitTestCase):
     """Test resolving to file formats."""
 
     def test_cml(self):
@@ -163,7 +172,7 @@ class TestFiles(unittest.TestCase):
         self.assertIn('CONECT', result)
 
 
-class TestImage(unittest.TestCase):
+class TestImage(RateLimitTestCase):
     """Test resolving to image depiction."""
 
     def test_png_format(self):
