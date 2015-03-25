@@ -10,6 +10,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 from __future__ import division
 import functools
+import inspect
 import logging
 import os
 
@@ -193,6 +194,68 @@ def resolve(input, representation, resolvers=None, get3d=False, **kwargs):
     return result
 
 
+def resolve_image(input, resolvers=None, fmt='png', width=300, height=300, frame=False, crop=None, bgcolor=None,
+                  atomcolor=None, hcolor=None, bondcolor=None, framecolor=None, symbolfontsize=11, linewidth=2,
+                  hsymbol='special', csymbol='special', stereolabels=False, stereowedges=True, header=None, footer=None,
+                  **kwargs):
+    """Resolve input to a 2D image depiction.
+
+    :param str input: Chemical identifier to resolve
+    :param list(str) resolvers: (Optional) Ordered list of resolvers to use
+    :param str fmt: (Optional) gif or png image format (default png)
+
+    :param int width: (Optional) Image width in pixels (default 300)
+    :param int height: (Optional) Image height in pixels (default 300)
+    :param bool frame: (Optional) Whether to show border frame (default False)
+    :param int crop: (Optional) Crop image with specified padding
+
+    :param int symbolfontsize: (Optional) Atom label font size (default 11)
+    :param int linewidth: (Optional) Bond line width (default 2)
+
+    :param str bgcolor: (Optional) Background color
+    :param str atomcolor: (Optional) Atom label color
+    :param str hcolor: (Optional) Hydrogen atom label color
+    :param str bondcolor: (Optional) Bond color
+    :param str framecolor: (Optional) Border frame color
+
+    :param bool hsymbol: (Optional) Hydrogens: all, special or none (default special)
+    :param bool csymbol: (Optional) Carbons: all, special or none (default special)
+    :param bool stereolabels: (Optional) Whether to show stereochemistry labels (default False)
+    :param bool stereowedges: (Optional) Whether to show wedge/dash bonds (default True)
+    :param str header: (Optional) Header text above structure
+    :param str footer: (Optional) Footer text below structure
+
+    """
+    # Aggregate all arguments into kwargs
+    args, _, _, values = inspect.getargvalues(inspect.currentframe())
+    for arg in args:
+        if values[arg] is not None:
+            kwargs[arg] = values[arg]
+    # Turn off anti-aliasing for transparent background
+    if kwargs.get('bgcolor') == 'transparent':
+        kwargs['antialiasing'] = False
+    # Renamed parameters
+    if 'stereolabels' in kwargs:
+        kwargs['showstereo'] = kwargs.pop('stereolabels')
+    if 'fmt' in kwargs:
+        kwargs['format'] = kwargs.pop('fmt')
+    # Toggle stereo wedges
+    if 'stereowedges' in kwargs:
+        status = kwargs.pop('stereowedges')
+        kwargs.update({'wedges': status, 'dashes': status})
+    # Constant values
+    kwargs.update({'representation': 'image', 'xml': False})
+    url = construct_api_url(**kwargs)
+    log.debug('Making image request: %s', url)
+    response = urlopen(url)
+    return response.read()
+
+
+# TODO: Support twirl as fmt paramter?
+# TODO: ipython html repr twirl, ipython png repr image
+
+
+
 def download(input, filename, representation, overwrite=False, resolvers=None, get3d=False, **kwargs):
     """Convenience function to save a CIR response as a file.
 
@@ -365,6 +428,11 @@ class Molecule(object):
         """Ring system count."""
         return resolve(self.input, 'ringsys_count', self.resolvers, **self.kwargs)
 
+    @memoized_property
+    def image(self):
+        """2D image depiction."""
+        return resolve_image(self.input, self.resolvers, **self.kwargs)
+
     @property
     def image_url(self):
         """URL of a GIF image."""
@@ -383,7 +451,3 @@ class Molecule(object):
         :param bool overwrite: (Optional) Whether to allow overwriting of an existing file
         """
         download(self.input, filename, representation, overwrite, self.resolvers, self.get3d, **self.kwargs)
-
-
-
-

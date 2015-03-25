@@ -25,6 +25,11 @@ Result
 .. autoclass:: Result
    :members:
 
+Images
+------
+
+.. autofunction:: resolve_image
+
 Request
 -------
 

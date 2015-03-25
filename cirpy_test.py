@@ -25,7 +25,7 @@ except ImportError:
     except ImportError:
         import xml.etree.ElementTree as etree
 
-from cirpy import request, resolve, query, Molecule, Result
+from cirpy import request, resolve, query, Molecule, Result, resolve_image
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -161,6 +161,20 @@ class TestFiles(unittest.TestCase):
         self.assertIn('HEADER', result)
         self.assertIn('ATOM', result)
         self.assertIn('CONECT', result)
+
+
+class TestImage(unittest.TestCase):
+    """Test resolving to image depiction."""
+
+    def test_png_format(self):
+        """Test that response looks like valid PNG data."""
+        img = resolve_image('Glucose')
+        self.assertEqual(img[:8], b'\x89PNG\x0d\x0a\x1a\x0a')
+
+    def test_gif_format(self):
+        """Test that response looks like valid GIF data."""
+        img = resolve_image('Glucose', fmt='gif')
+        self.assertEqual(img[:4], b'GIF8')
 
 
 if __name__ == '__main__':
