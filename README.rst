@@ -1,6 +1,18 @@
 CIRpy
 =====
 
+.. image:: http://img.shields.io/pypi/v/CIRpy.svg?style=flat
+    :target: https://pypi.python.org/pypi/CIRpy
+
+.. image:: http://img.shields.io/pypi/l/CIRpy.svg?style=flat
+    :target: https://github.com/mcs07/CIRpy/blob/master/LICENSE
+
+.. image:: http://img.shields.io/travis/mcs07/CIRpy/master.svg?style=flat
+    :target: https://travis-ci.org/mcs07/CIRpy
+
+.. image:: http://img.shields.io/coveralls/mcs07/CIRpy/master.svg?style=flat
+    :target: https://coveralls.io/r/mcs07/CIRpy?branch=master
+
 Introduction
 ------------
 
