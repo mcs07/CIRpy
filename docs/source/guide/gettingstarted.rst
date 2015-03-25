@@ -46,25 +46,25 @@ same way::
 
 The full list of file formats::
 
-    alc
-    cdxml
-    cerius
-    charmm
-    cif
-    cml
-    ctx
-    gjf
-    gromacs
-    hyperchem
-    jme
-    maestro
-    mol
-    mol2
-    mrv
-    pdb
-    sdf3000
-    sln
-    xyz
+    alc         # Alchemy format
+    cdxml       # CambridgeSoft ChemDraw XML format
+    cerius      # MSI Cerius II format
+    charmm      # Chemistry at HARvard Macromolecular Mechanics file format
+    cif         # Crystallographic Information File
+    cml         # Chemical Markup Language
+    ctx         # Gasteiger Clear Text format
+    gjf         # Gaussian input data file
+    gromacs     # GROMACS file format
+    hyperchem   # HyperChem file format
+    jme         # Java Molecule Editor format
+    maestro     # Schroedinger MacroModel structure file format
+    mol         # Symyx molecule file
+    mol2        # Tripos Sybyl MOL2 format
+    mrv         # ChemAxon MRV format
+    pdb         # Protein Data Bank
+    sdf3000     # Symyx Structure Data Format 3000
+    sln         # SYBYL Line Notation
+    xyz         # xyz file format
 
 Properties
 ----------
