@@ -33,7 +33,7 @@ except ImportError:
 
 __author__ = 'Matt Swain'
 __email__ = 'm.swain@me.com'
-__version__ = '1.0.1'
+__version__ = '1.0.2'
 __license__ = 'MIT'
 
 log = logging.getLogger('cirpy')
