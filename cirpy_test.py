@@ -67,21 +67,21 @@ class TestQuery(RateLimitTestCase):
     def test_morphine_inchi(self):
         """Test morphine query for inchi returns expected result."""
         results = query('morphine', 'inchi')
-        self.assertEqual(len(results), 1)
-        self.assertEqual(results[0].input, 'morphine')
-        self.assertEqual(results[0].representation, 'inchi')
-        self.assertEqual(results[0].resolver, 'name_by_cir')
-        self.assertEqual(results[0].input_format, 'chemical name (CIR)')
-        self.assertEqual(results[0].notation, 'Morphine')
-        self.assertEqual(results[0].value, 'InChI=1/C17H19NO3/c1-18-7-6-17-10-3-5-13(20)16(17)21-15-12(19)4-2-9(14(15)17)8-11(10)18/h2-5,10-11,13,16,19-20H,6-8H2,1H3/t10-,11+,13?,16-,17-/m0/s1')
+        self.assertEqual(len(results), 2)
+        self.assertEqual(results[1].input, 'morphine')
+        self.assertEqual(results[1].representation, 'inchi')
+        self.assertEqual(results[1].resolver, 'name_by_cir')
+        self.assertEqual(results[1].input_format, 'chemical name (CIR)')
+        self.assertEqual(results[1].notation, 'Morphine')
+        self.assertEqual(results[1].value, 'InChI=1/C17H19NO3/c1-18-7-6-17-10-3-5-13(20)16(17)21-15-12(19)4-2-9(14(15)17)8-11(10)18/h2-5,10-11,13,16,19-20H,6-8H2,1H3/t10-,11+,13?,16-,17-/m0/s1')
 
     def test_query_dict(self):
         """Test dict-style access to result attributes."""
         results = query('Morphine', 'inchi')
-        self.assertEqual(len(results), 1)
-        self.assertEqual(results[0]['value'], 'InChI=1/C17H19NO3/c1-18-7-6-17-10-3-5-13(20)16(17)21-15-12(19)4-2-9(14(15)17)8-11(10)18/h2-5,10-11,13,16,19-20H,6-8H2,1H3/t10-,11+,13?,16-,17-/m0/s1')
-        self.assertEqual(results[0]['notation'], 'Morphine')
-        self.assertEqual(results[0]['resolver'], 'name_by_cir')
+        self.assertEqual(len(results), 2)
+        self.assertEqual(results[1]['value'], 'InChI=1/C17H19NO3/c1-18-7-6-17-10-3-5-13(20)16(17)21-15-12(19)4-2-9(14(15)17)8-11(10)18/h2-5,10-11,13,16,19-20H,6-8H2,1H3/t10-,11+,13?,16-,17-/m0/s1')
+        self.assertEqual(results[1]['notation'], 'Morphine')
+        self.assertEqual(results[1]['resolver'], 'name_by_cir')
 
     def test_no_result_query(self):
         """Test that an empty list is returned when there are no results."""
@@ -96,8 +96,8 @@ class TestQuery(RateLimitTestCase):
         """Test expected results are returned when using custom name resolvers."""
         results = query('2,4,6-trinitrotoluene', 'smiles')
         self.assertEqual(len(results), 2)
-        self.assertEqual(results[0], Result(input='2,4,6-trinitrotoluene', representation='smiles', resolver='name_by_opsin', input_format='IUPAC name (OPSIN)', notation='2,4,6-trinitrotoluene', value='[N+](=O)([O-])C1=C(C(=CC(=C1)[N+](=O)[O-])[N+](=O)[O-])C'))
-        self.assertEqual(results[1], Result(input='2,4,6-trinitrotoluene', representation='smiles', resolver='name_by_cir', input_format='chemical name (CIR)', notation='2,4,6-Trinitrotoluene', value='C1=C(C=C(C(=C1[N+]([O-])=O)C)[N+]([O-])=O)[N+]([O-])=O'))
+        self.assertEqual(results[0], Result(input='2,4,6-trinitrotoluene', representation='smiles', resolver='name_by_opsin', input_format='IUPAC name (OPSIN)', notation='2,4,6-trinitrotoluene', value='Cc1c(cc(cc1[N+]([O-])=O)[N+]([O-])=O)[N+]([O-])=O'))
+        self.assertEqual(results[1], Result(input='2,4,6-trinitrotoluene', representation='smiles', resolver='name_by_cir', input_format='chemical name (CIR)', notation='2,4,6-Trinitrotoluene', value='Cc1c(cc(cc1[N+]([O-])=O)[N+]([O-])=O)[N+]([O-])=O'))
 
     def test_result_equality(self):
         """Test that identical result objects are considered equal."""
@@ -113,7 +113,7 @@ class TestResolve(RateLimitTestCase):
 
     def test_alanine_smiles(self):
         """Test that alanine smiles resolves the expected result."""
-        self.assertEqual(resolve('Alanine', 'smiles'), 'N[C@@H](C)C(=O)O')
+        self.assertEqual(resolve('Alanine', 'smiles'), 'C[C@H](N)C(O)=O')
 
     def test_no_results_resolve(self):
         """Test that None is returned when there are no results."""
@@ -128,18 +128,18 @@ class TestResolve(RateLimitTestCase):
         """Test that TNT smiles resolves the expected result."""
         self.assertEqual(
             resolve('2,4,6-trinitrotoluene', 'smiles'),
-            '[N+](=O)([O-])C1=C(C(=CC(=C1)[N+](=O)[O-])[N+](=O)[O-])C'
+            'Cc1c(cc(cc1[N+]([O-])=O)[N+]([O-])=O)[N+]([O-])=O'
         )
 
     def test_tnt_smiles_custom_resolvers(self):
         """Test custom resolvers return the expected result."""
         self.assertEqual(
             resolve('2,4,6-trinitrotoluene', 'smiles', ['name_by_opsin', 'name_by_cir']),
-            '[N+](=O)([O-])C1=C(C(=CC(=C1)[N+](=O)[O-])[N+](=O)[O-])C'
+            'Cc1c(cc(cc1[N+]([O-])=O)[N+]([O-])=O)[N+]([O-])=O'
         )
         self.assertEqual(
             resolve('2,4,6-trinitrotoluene', 'smiles', ['name_by_cir', 'name_by_opsin']),
-            'C1=C(C=C(C(=C1[N+]([O-])=O)C)[N+]([O-])=O)[N+]([O-])=O'
+            'Cc1c(cc(cc1[N+]([O-])=O)[N+]([O-])=O)[N+]([O-])=O'
         )
 
 
@@ -150,7 +150,7 @@ class TestMolecule(RateLimitTestCase):
         """Test Molecule image_url attribute."""
         self.assertEqual(
             Molecule('C#N', ['smiles']).image_url,
-            'http://cactus.nci.nih.gov/chemical/structure/C%23N/image?resolver=smiles'
+            'https://cactus.nci.nih.gov/chemical/structure/C%23N/image?resolver=smiles'
         )
 
 
