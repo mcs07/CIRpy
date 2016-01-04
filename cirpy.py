@@ -39,7 +39,7 @@ __license__ = 'MIT'
 log = logging.getLogger('cirpy')
 log.addHandler(logging.NullHandler())
 
-API_BASE = 'http://cactus.nci.nih.gov/chemical/structure'
+API_BASE = 'https://cactus.nci.nih.gov/chemical/structure'
 FILE_FORMATS = {
     'alc', 'cdxml', 'cerius', 'charmm', 'cif', 'cml', 'ctx', 'gjf', 'gromacs', 'hyperchem', 'jme', 'maestro', 'mol',
     'mol2', 'mrv', 'pdb', 'sdf3000', 'sln', 'xyz'
