@@ -3,7 +3,7 @@
 Installation
 ============
 
-CIRpy supports Python versions 2.7, 3.2, 3.3 and 3.4. There are no required dependencies.
+CIRpy supports Python versions 2.7, 3.3, 3.4 and 3.5. There are no required dependencies.
 
 Option 1: Use pip (recommended)
 -------------------------------
