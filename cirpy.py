@@ -49,8 +49,8 @@ FILE_FORMATS = {
 def construct_api_url(input, representation, resolvers=None, get3d=False, tautomers=False, xml=True, **kwargs):
     """Return the URL for the desired API endpoint.
 
-    :param str input: Chemical identifier to resolve
-    :param str representation: Desired output representation
+    :param string input: Chemical identifier to resolve
+    :param string representation: Desired output representation
     :param list(str) resolvers: (Optional) Ordered list of resolvers to use
     :param bool get3d: (Optional) Whether to return 3D coordinates (where applicable)
     :param bool tautomers: (Optional) Whether to return all tautomers
@@ -80,9 +80,9 @@ def construct_api_url(input, representation, resolvers=None, get3d=False, tautom
 def request(input, representation, resolvers=None, get3d=False, tautomers=False, **kwargs):
     """Make a request to CIR and return the XML response.
 
-    :param str input: Chemical identifier to resolve
-    :param str representation: Desired output representation
-    :param list(str) resolvers: (Optional) Ordered list of resolvers to use
+    :param string input: Chemical identifier to resolve
+    :param string representation: Desired output representation
+    :param list(string) resolvers: (Optional) Ordered list of resolvers to use
     :param bool get3d: (Optional) Whether to return 3D coordinates (where applicable)
     :param bool tautomers: (Optional) Whether to return all tautomers
     :returns: XML response from CIR
@@ -102,13 +102,13 @@ class Result(object):
     def __init__(self, input, notation, input_format, resolver, representation, value):
         """
 
-        :param str input: Originally supplied input identifier that produced this result
-        :param str notation: Identifier matched by the resolver or tautomer ID
-        :param str input_format: Format of the input as interpreted by the resolver
-        :param str resolver: Resolver used to produce this result
-        :param str representation: Requested output representation
+        :param string input: Originally supplied input identifier that produced this result
+        :param string notation: Identifier matched by the resolver or tautomer ID
+        :param string input_format: Format of the input as interpreted by the resolver
+        :param string resolver: Resolver used to produce this result
+        :param string representation: Requested output representation
         :param value: Actual result value
-        :type value: str or list(str)
+        :type value: string or list(string)
         """
         self.input = input
         self.representation = representation
@@ -149,9 +149,9 @@ class Result(object):
 def query(input, representation, resolvers=None, get3d=False, tautomers=False, **kwargs):
     """Get all results for resolving input to the specified output representation.
 
-    :param str input: Chemical identifier to resolve
-    :param str representation: Desired output representation
-    :param list(str) resolvers: (Optional) Ordered list of resolvers to use
+    :param string input: Chemical identifier to resolve
+    :param string representation: Desired output representation
+    :param list(string) resolvers: (Optional) Ordered list of resolvers to use
     :param bool get3d: (Optional) Whether to return 3D coordinates (where applicable)
     :param bool tautomers: (Optional) Whether to return all tautomers
     :returns: List of resolved results
@@ -179,12 +179,12 @@ def query(input, representation, resolvers=None, get3d=False, tautomers=False, *
 def resolve(input, representation, resolvers=None, get3d=False, **kwargs):
     """Resolve input to the specified output representation.
 
-    :param str input: Chemical identifier to resolve
-    :param str representation: Desired output representation
-    :param list(str) resolvers: (Optional) Ordered list of resolvers to use
+    :param string input: Chemical identifier to resolve
+    :param string representation: Desired output representation
+    :param list(string) resolvers: (Optional) Ordered list of resolvers to use
     :param bool get3d: (Optional) Whether to return 3D coordinates (where applicable)
     :returns: Output representation or None
-    :rtype: str or None
+    :rtype: string or None
     :raises HTTPError: if CIR returns an error code
     :raises ParseError: if CIR response is uninterpretable
     """
@@ -200,9 +200,9 @@ def resolve_image(input, resolvers=None, fmt='png', width=300, height=300, frame
                   **kwargs):
     """Resolve input to a 2D image depiction.
 
-    :param str input: Chemical identifier to resolve
-    :param list(str) resolvers: (Optional) Ordered list of resolvers to use
-    :param str fmt: (Optional) gif or png image format (default png)
+    :param string input: Chemical identifier to resolve
+    :param list(string) resolvers: (Optional) Ordered list of resolvers to use
+    :param string fmt: (Optional) gif or png image format (default png)
 
     :param int width: (Optional) Image width in pixels (default 300)
     :param int height: (Optional) Image height in pixels (default 300)
@@ -212,18 +212,18 @@ def resolve_image(input, resolvers=None, fmt='png', width=300, height=300, frame
     :param int symbolfontsize: (Optional) Atom label font size (default 11)
     :param int linewidth: (Optional) Bond line width (default 2)
 
-    :param str bgcolor: (Optional) Background color
-    :param str atomcolor: (Optional) Atom label color
-    :param str hcolor: (Optional) Hydrogen atom label color
-    :param str bondcolor: (Optional) Bond color
-    :param str framecolor: (Optional) Border frame color
+    :param string bgcolor: (Optional) Background color
+    :param string atomcolor: (Optional) Atom label color
+    :param string hcolor: (Optional) Hydrogen atom label color
+    :param string bondcolor: (Optional) Bond color
+    :param string framecolor: (Optional) Border frame color
 
     :param bool hsymbol: (Optional) Hydrogens: all, special or none (default special)
     :param bool csymbol: (Optional) Carbons: all, special or none (default special)
     :param bool stereolabels: (Optional) Whether to show stereochemistry labels (default False)
     :param bool stereowedges: (Optional) Whether to show wedge/dash bonds (default True)
-    :param str header: (Optional) Header text above structure
-    :param str footer: (Optional) Footer text below structure
+    :param string header: (Optional) Header text above structure
+    :param string footer: (Optional) Footer text below structure
 
     """
     # Aggregate all arguments into kwargs
@@ -261,11 +261,11 @@ def download(input, filename, representation, overwrite=False, resolvers=None, g
 
     This is just a simple wrapper around the resolve function.
 
-    :param str input: Chemical identifier to resolve
-    :param str filename: File path to save to
-    :param str representation: Desired output representation
+    :param string input: Chemical identifier to resolve
+    :param string filename: File path to save to
+    :param string representation: Desired output representation
     :param bool overwrite: (Optional) Whether to allow overwriting of an existing file
-    :param list(str) resolvers: (Optional) Ordered list of resolvers to use
+    :param list(string) resolvers: (Optional) Ordered list of resolvers to use
     :param bool get3d: (Optional) Whether to return 3D coordinates (where applicable)
     :raises HTTPError: if CIR returns an error code
     :raises ParseError: if CIR response is uninterpretable
@@ -446,8 +446,8 @@ class Molecule(object):
     def download(self, filename, representation, overwrite=False):
         """Download the resolved structure as a file.
 
-        :param str filename: File path to save to
-        :param str representation: Desired output representation
+        :param string filename: File path to save to
+        :param string representation: Desired output representation
         :param bool overwrite: (Optional) Whether to allow overwriting of an existing file
         """
         download(self.input, filename, representation, overwrite, self.resolvers, self.get3d, **self.kwargs)
