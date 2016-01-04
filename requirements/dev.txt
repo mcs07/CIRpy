@@ -1,4 +1,4 @@
 -r common.txt
-bumpversion==0.5.1
-coverage==3.7.1
-coveralls==0.5
+bumpversion>=0.5.3
+coverage>=4.0.3
+coveralls>=1.1
