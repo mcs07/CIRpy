@@ -374,11 +374,6 @@ class Molecule(object):
         return resolve(self.input, 'cas', self.resolvers, **self.kwargs)
 
     @memoized_property
-    def chemspider_id(self):
-        """ChemSpider ID."""
-        return resolve(self.input, 'chemspider_id', self.resolvers, **self.kwargs)
-
-    @memoized_property
     def mw(self):
         """Molecular weight."""
         return resolve(self.input, 'mw', self.resolvers, **self.kwargs)

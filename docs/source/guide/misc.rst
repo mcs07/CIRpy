@@ -33,7 +33,6 @@ given input::
     mol.names
     mol.iupac_name
     mol.cas
-    mol.chemspider_id
     mol.image_url               # The url of a GIF image
     mol.twirl_url               # The url of a TwirlyMol 3D viewer
     mol.mw                      # Molecular weight

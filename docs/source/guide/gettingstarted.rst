@@ -30,7 +30,6 @@ output representations for the second parameter are::
     names
     iupac_name
     cas
-    chemspider_id
     formula
 
 All return a string, apart from ``names`` and ``cas``, which return a list of strings.

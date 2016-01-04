@@ -15,10 +15,8 @@ tried by default, are::
     ncicadd_identifier      # (for FICTS, FICuS, uuuuu)
     hashisy
     cas_number
-    chemspider_id           # input must be chemspider_id=1234567
     name_by_opsin
     name_by_cir
-    name_by_chemspider
 
 Customizing resolvers
 ---------------------
@@ -37,22 +35,21 @@ different formats, but you know which format it is.
 Resolving names
 ---------------
 
-By default, CIR resolves names first by using OPSIN, and if that fails, using a lookup in its own name index. A
-ChemSpider lookup is also available, but not used by default. With CIRpy you can tell CIR to use any combination of
-these three services, and also specify the order of precedence.
+By default, CIR resolves names first by using OPSIN, and if that fails, using a lookup in its own name index. With
+CIRpy you can customize which of these resolvers are used, and also specify the order of precedence.
 
 Just use the ``resolve`` function with a third parameter - a list containing any of the strings ``name_by_opsin``,
-``name_by_cir`` and ``name_by_chemspider``, in the order in which they should be tried::
+``name_by_cir`` in the order in which they should be tried::
 
-    >>> cirpy.resolve('Aspirin', 'smiles', ['name_by_opsin', 'name_by_cir', 'name_by_chemspider'])
-    'C1=CC=CC(=C1C(O)=O)OC(C)=O'
-    >>> cirpy.resolve('Aspirin', 'smiles', ['name_by_chemspider','name_by_cir'])
-    'CC(=O)OC1=C(C=CC=C1)C(O)=O'
+    >>> cirpy.resolve('Morphine', 'smiles', ['name_by_opsin'])
+    'CN1CC[C@]23[C@H]4Oc5c(O)ccc(C[C@@H]1[C@@H]2C=C[C@@H]4O)c35'
+    >>> cirpy.resolve('Morphine', 'smiles', ['name_by_cir','name_by_opsin'])
+    'CN1CC[C@]23[C@H]4Oc5c(O)ccc(C[C@@H]1[C@@H]2C=CC4O)c35'
 
 `Read more about resolving names on the CIR blog`_.
 
 .. note::
 
-   The ``name_by_chemspider`` resolver is not used unless explicitly specified in the resolvers list.
+   The ``chemspider_id`` and ``name_by_chemspider`` resolvers no longer exist.
 
 .. _`Read more about resolving names on the CIR blog`: http://cactus.nci.nih.gov/blog/?p=1386
