@@ -6,9 +6,9 @@ Python interface for the Chemical Identifier Resolver (CIR) by the CADD Group at
 https://github.com/mcs07/CIRpy
 """
 
-
-
-
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import division
 import logging
 import os
 import time
@@ -17,7 +17,7 @@ import unittest
 try:
     from urllib.error import HTTPError
 except ImportError:
-    from urllib.error import HTTPError
+    from urllib2 import HTTPError
 
 try:
     from lxml import etree
