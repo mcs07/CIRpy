@@ -5,7 +5,7 @@ from setuptools import setup
 
 
 if os.path.exists('README.rst'):
-    long_description = open('README.rst').read()
+    long_description = open('README.rst', encoding='utf-8').read()
 else:
     long_description = '''CIRpy is a Python interface for the Chemical Identifier Resolver web service that is provided
 by the CADD Group at the NCI/NIH.'''
